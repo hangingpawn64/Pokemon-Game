@@ -44,16 +44,10 @@ class Pokemon {
         vector<Move> moves;
     
     public:
-        Pokemon(string name, Type type, int maxHP, int currentHP,
-            int attack, int defence, int speed, vector<Move> moves){
-                this->name = name;
-                this->type = type;
-                this->maxHP = maxHP;
-                this->currentHP = currentHP;
-                this->attack = attack;
-                this->defence = defence;
-                this->speed = speed;
-            }
+        Pokemon(string name, Type type, int maxHP, int attack, int defence, int speed)
+                : name(name), type(type), maxHP(maxHP), currentHP(maxHP),
+                attack(attack), defence(defence), speed(speed) {}
+
 
             void addMove(Move move){
                 if(moves.size()<3) {moves.push_back(move);}
@@ -105,19 +99,125 @@ class Pokemon {
             }
 };
 
-int main(){
-    srand(time(0)); // for randomness
+class Pikachu : public Pokemon {
+public:
+    Pikachu()
+        : Pokemon("Pikachu", Type::Electric, 100, 55, 40, 90) {
+        addMove(Move("Thunderbolt", Type::Electric, 90, 100));
+        addMove(Move("Quick Attack", Type::Normal, 40, 100));
+        addMove(Move("Iron Tail", Type::Normal, 70, 75));
+    }
+};
 
-    Move thunderbolt("Thunderbolt", Type::Electric, 90, 100);
-    Move quickAttack("Quick Attack", Type::Normal, 40, 100);
-    Move ironTail("Iron Tail", Type::Normal, 70, 75);
+class Bulbasaur : public Pokemon {
+public:
+    Bulbasaur()
+        : Pokemon("Bulbasaur", Type::Grass, 100, 49, 49, 45) {
+        addMove(Move("Vine Whip", Type::Grass, 45, 100));
+        addMove(Move("Tackle", Type::Normal, 40, 100));
+        addMove(Move("Razor Leaf", Type::Grass, 55, 95));
+    }
+};
 
-    Pokemon pikachu("Pikachu", Type::Electric, 100, 100, 55, 40, 90, vector<Move>());
-    Pokemon bulbasaur("Bulbasaur", Type::Grass, 100, 100, 49, 49, 45, vector<Move>());
+class Charmander : public Pokemon {
+public:
+    Charmander()
+        : Pokemon("Charmander", Type::Fire, 100, 52, 43, 65) {
+        addMove(Move("Ember", Type::Fire, 40, 100));
+        addMove(Move("Scratch", Type::Normal, 40, 100));
+        addMove(Move("Flame Burst", Type::Fire, 70, 85));
+    }
+};
 
-    pikachu.addMove(thunderbolt);
-    pikachu.addMove(quickAttack);
-    pikachu.addMove(ironTail);
+class Squirtle : public Pokemon {
+public:
+    Squirtle()
+        : Pokemon("Squirtle", Type::Water, 100, 48, 65, 43) {
+        addMove(Move("Water Gun", Type::Water, 40, 100));
+        addMove(Move("Tackle", Type::Normal, 40, 100));
+        addMove(Move("Bubble Beam", Type::Water, 65, 95));
+    }
+};
 
-    pikachu.useMove(0, bulbasaur); // Thunderbolt on Bulbasaur
+
+class Battle{
+    private:
+        Pokemon& player;
+        Pokemon& enemy;
+
+    public:
+        Battle(Pokemon& player, Pokemon& enemy) : player(player), enemy(enemy){}
+
+        void run(){
+            cout<<"\n Battle Start! ⚔️ 🛡️"<<player.getName()<<" vs "<< enemy.getName()<<endl;
+
+            while(!player.isFainted() && !enemy.isFainted()){
+                printStatus();
+
+                if(player.getSpeed() >= enemy.getSpeed()) {
+                    playerTurn();
+                    if(enemy.isFainted()) break;
+                    aiturn();
+                }
+                else{
+                    aiturn();
+                    if(player.isFainted()) break;
+                    playerTurn();
+                }
+                cout<<"\n Round Ended\n";
+            }
+
+            if(player.isFainted()){
+                cout<<player.getName()<<"Fainted! You lost the battle!"<<endl;
+                cout<<"\n======== Battle Ended =========\n";
+            }
+            else{
+                cout << enemy.getName() << " fainted! You win!\n"<<endl;
+                cout<<"\n======== Battle Ended =========\n";
+            }
+        }
+        void printStatus(){
+            cout<<"\n Status: \n";
+            cout<<player.getName()<<": "<<player.getCurrentHP()<<"/"<<player.getmaxHP()<<"\n";
+            cout<<enemy.getName()<<": "<<enemy.getCurrentHP()<<"/"<<enemy.getmaxHP()<<"\n";
+        }
+        void playerTurn(){
+            cout<<"\n Your Turn: choose a move\n";
+            
+            const vector<Move>& moves = player.getMoves();
+            for(int i = 0; i< (int)moves.size(); i++){
+                cout<<i<<") "<<moves[i].name<<" (Power: "<<moves[i].power
+                    <<", Acc: "<< moves[i].accuracy<<" , Type: "
+                    <<typeToString(moves[i].type)<<" )\n";
+            }
+
+            int choice = 0;
+            cout<<"Enter choice index: ";
+            cin>>choice;
+
+            if(choice < 0 || choice >= moves.size()){
+                cout<<"Invalid Choice. using Move 0. \n";
+                choice = 0;
+            }
+
+            player.useMove(choice, enemy);
+        }
+        void aiturn(){
+            cout<<"\n Enemy Turn: "<< enemy.getName()<<" is choosing a move...\n";
+            const vector<Move>& moves = enemy.getMoves();
+            int index = rand() % moves.size();
+            enemy.useMove(index, player);
+        }
+};
+
+int main() {
+    srand((unsigned)time(0));
+
+    Pikachu pikachu;
+    Bulbasaur bulbasaur;
+
+    Battle battle(pikachu, bulbasaur);
+    battle.run();
+
+    return 0;
 }
