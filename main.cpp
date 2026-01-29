@@ -66,7 +66,7 @@ class Pokemon {
             void takeDamage(int amount){
                 currentHP -= amount;
                 if (currentHP < 0) currentHP = 0;
-                cout<<name<<" took "<<"damage: "<<amount<<"HP: "<<currentHP<<"/"<<maxHP<<endl;
+                cout<<name<<" took "<<"damage: "<<amount<<" HP: "<<currentHP<<"/"<<maxHP<<endl;
             }
 
             void useMove(int index, Pokemon& target){
@@ -149,7 +149,7 @@ class Battle{
         Battle(Pokemon& player, Pokemon& enemy) : player(player), enemy(enemy){}
 
         void run(){
-            cout<<"\n Battle Start! ⚔️ 🛡️"<<player.getName()<<" vs "<< enemy.getName()<<endl;
+            cout<<"\n Battle Start! ⚔️ 🛡️  "<<player.getName()<<" vs "<< enemy.getName()<<endl;
 
             while(!player.isFainted() && !enemy.isFainted()){
                 printStatus();
@@ -176,11 +176,29 @@ class Battle{
                 cout<<"\n======== Battle Ended =========\n";
             }
         }
-        void printStatus(){
-            cout<<"\n Status: \n";
-            cout<<player.getName()<<": "<<player.getCurrentHP()<<"/"<<player.getmaxHP()<<"\n";
-            cout<<enemy.getName()<<": "<<enemy.getCurrentHP()<<"/"<<enemy.getmaxHP()<<"\n";
+
+        string generateHPBar(int current, int max, int width=20){
+            int filled = (int)((double)current / max * width);
+            string bar = "[";
+            for(int i=0; i<width; ++i){
+                if(i<filled) bar += "=";
+                else bar += " ";
+            }
+            bar += "]";
+            return bar;
         }
+
+        void printStatus(){
+            cout<<"\nBattle Status:\n";
+            cout << "🧍 You: " << player.getName() << " (" << typeToString(player.getType()) << ")\n";
+            cout << "HP: " << generateHPBar(player.getCurrentHP(), player.getmaxHP())
+                 << " " << player.getCurrentHP() << "/" << player.getmaxHP() << "\n";
+
+            cout << "\n🤖 Enemy: " << enemy.getName() << " (" << typeToString(enemy.getType()) << ")\n";
+            cout << "HP: " << generateHPBar(enemy.getCurrentHP(), enemy.getmaxHP())
+                 << " " << enemy.getCurrentHP() << "/" << enemy.getmaxHP() << "\n";
+        }
+
         void playerTurn(){
             cout<<"\n Your Turn: choose a move\n";
             
@@ -215,8 +233,35 @@ int main() {
 
     Pikachu pikachu;
     Bulbasaur bulbasaur;
+    Charmander charmander;
+    Squirtle squirtle;
 
-    Battle battle(pikachu, bulbasaur);
+    vector<Pokemon*> roster = { &pikachu, &bulbasaur, &charmander, &squirtle};
+    cout<<"Choose Your Pokemon!\n";
+    for(int i=0; i<(int)roster.size(); ++i){
+        cout<< i <<") "<<roster[i]->getName()<<" (Type: "
+        <<typeToString(roster[i]->getType())<<")\n";
+    }
+
+    int choice = 0;
+    cout << "Enter the number of your choice: ";
+    cin >> choice;
+    if (choice < 0 || choice >= (int)roster.size()) {
+        cout << "Invalid choice, defaulting to Pikachu.\n";
+        choice = 0;
+    }
+
+    Pokemon* player =roster[choice];
+
+    roster.erase(roster.begin() + choice);
+
+    int enemyIndex = rand() % roster.size();
+    Pokemon* enemy = roster[enemyIndex];
+
+    cout<< "\nYou Chose: "<<player->getName()<<"!\n";
+    cout<< "\nEnemy Chose: "<<enemy->getName()<<"!\n";    
+
+    Battle battle(*player, *enemy);
     battle.run();
 
     return 0;
