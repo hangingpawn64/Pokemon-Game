@@ -1,7 +1,8 @@
 #include "Bulbasaur.h"
 
 Bulbasaur::Bulbasaur()
-        : Pokemon("Bulbasaur", Type::Grass, 100, 49, 49, 45) {
+        : Pokemon("Bulbasaur", Type::Grass, 100, 49, 49, 45,
+                  "https://img.pokemondb.net/sprites/go/normal/bulbasaur.png") {
         addMove(Move("Vine Whip", Type::Grass, 45, 100));
         addMove(Move("Tackle", Type::Normal, 40, 100));
         addMove(Move("Razor Leaf", Type::Grass, 55, 95));

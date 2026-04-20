@@ -1,7 +1,8 @@
 #include "Charmander.h"
 
 Charmander::Charmander()
-    : Pokemon("Charmander", Type::Fire, 100, 52, 43, 65) {
+    : Pokemon("Charmander", Type::Fire, 100, 52, 43, 65,
+              "https://img.pokemondb.net/sprites/brilliant-diamond-shining-pearl/normal/charmander.png") {
     addMove(Move("Ember", Type::Fire, 40, 100));
     addMove(Move("Scratch", Type::Normal, 40, 100));
     addMove(Move("Flame Burst", Type::Fire, 70, 85));

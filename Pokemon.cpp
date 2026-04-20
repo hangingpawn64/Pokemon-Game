@@ -2,8 +2,9 @@
 #include <iostream>
 #include <cstdlib>
 
-Pokemon::Pokemon(const std::string& name, Type type, int maxHP, int attack, int defense, int speed)
-    : name(name), type(type), maxHP(maxHP), currentHP(maxHP),
+Pokemon::Pokemon(const std::string& name, Type type, int maxHP, int attack, int defense, int speed,
+                 const std::string& spriteUrl)
+    : name(name), spriteUrl(spriteUrl), type(type), maxHP(maxHP), currentHP(maxHP),
       attack(attack), defense(defense), speed(speed), status(Status::NONE) {}
 
 void Pokemon::addMove(const Move& move) {
@@ -11,6 +12,8 @@ void Pokemon::addMove(const Move& move) {
 }
 
 std::string Pokemon::getName() const { return name; }
+std::string Pokemon::getSpriteUrl() const { return spriteUrl; }
+void Pokemon::setSpriteUrl(const std::string& url) { spriteUrl = url; }
 Type Pokemon::getType() const { return type; }
 int Pokemon::getmaxHP() const { return maxHP; }
 int Pokemon::getCurrentHP() const { return currentHP; }
@@ -20,30 +23,53 @@ int Pokemon::getSpeed() const { return speed; }
 bool Pokemon::isFainted() const { return currentHP <= 0; }
 const std::vector<Move>& Pokemon::getMoves() const { return moves; }
 
-void Pokemon::takeDamage(int amount) {
+std::string Pokemon::takeDamage(int amount) {
     currentHP -= amount;
     if (currentHP < 0) currentHP = 0;
-    std::cout << name << " took damage: " << amount << " HP: " << currentHP << "/" << maxHP << std::endl;
+    std::string msg = name + " took damage: " + std::to_string(amount) + " HP: " + std::to_string(currentHP) + "/" + std::to_string(maxHP);
+    std::cout << msg << std::endl;
+    return msg;
 }
 
-void Pokemon::useMove(int index, Pokemon& target) {
-    if (index < 0 || index >= (int)moves.size()) return;
+void Pokemon::healFull() {
+    currentHP = maxHP;
+    status = Status::NONE;
+}
+
+std::vector<std::string> Pokemon::useMove(int index, Pokemon& target) {
+    std::vector<std::string> msgs;
+    if (index < 0 || index >= (int)moves.size()) return msgs;
 
     if (status == Status::PARALYZED) {
         int skipChance = rand() % 100;
         if (skipChance < 25) {
-            std::cout << name << " is paralyzed and couldn't move!\n";
-            return;
+            std::string t = name + " is paralyzed and couldn't move!";
+            std::cout << t << "\n";
+            msgs.push_back(t);
+            return msgs;
         }
     }
 
-    Move move = moves[index];
-    std::cout << name << " used " << move.name << "!\n";
+    const Move& move = moves[index];
+
+    // Random flavorful message
+    std::vector<std::string> flavors = {
+        name + " launches a ferocious " + move.name + "!",
+        name + " attacks with " + move.name + "!",
+        name + " strikes hard using " + move.name + "!",
+        name + " delivers a clean " + move.name + "!",
+        name + " used " + move.name + " with determination!"
+    };
+    std::string usedMsg = flavors[rand() % flavors.size()];
+    std::cout << usedMsg << "\n";
+    msgs.push_back(usedMsg);
 
     int hitChance = rand() % 100;
     if (hitChance >= move.accuracy) {
-        std::cout << "But it missed!\n";
-        return;
+        std::string t = "But it missed!";
+        std::cout << t << "\n";
+        msgs.push_back(t);
+        return msgs;
     }
 
     double eff = 1.0;
@@ -54,21 +80,44 @@ void Pokemon::useMove(int index, Pokemon& target) {
     if (move.type == Type::Grass && target.type == Type::Fire) eff = 0.5;
     if (move.type == Type::Fire && target.type == Type::Water) eff = 0.5;
 
+    // Critical hit?
+    bool crit = (rand() % 100 < 10); // 10% crit chance
+    if (crit) eff *= 1.5;
+
     int rawDamage = (attack * move.power) / std::max(1, target.defense);
     int damage = std::max(1, (int)(rawDamage * eff));
 
     target.takeDamage(damage);
 
-    if (eff > 1.0) std::cout << "It's Super Effective!\n";
-    else if (eff < 1.0) std::cout << "It's not very Effective...\n";
+    if (crit) {
+        std::string t = "A critical hit!";
+        std::cout << t << "\n";
+        msgs.push_back(t);
+    }
 
+    if (eff > 1.0) {
+        std::string t = "It's Super Effective!";
+        std::cout << t << "\n";
+        msgs.push_back(t);
+    }
+    else if (eff < 1.0) {
+        std::string t = "It's not very Effective...";
+        std::cout << t << "\n";
+        msgs.push_back(t);
+    }
+
+    // Thunderbolt paralysis
     if (move.name == "Thunderbolt") {
         int effectRoll = rand() % 100;
         if (effectRoll < 20 && target.getStatus() == Status::NONE) {
-            std::cout << target.getName() << " was paralyzed!\n";
+            std::string t = target.getName() + " was paralyzed!";
+            std::cout << t << "\n";
+            msgs.push_back(t);
             target.setStatus(Status::PARALYZED);
         }
     }
+
+    return msgs;
 }
 
 void Pokemon::setStatus(Status s) { status = s; }

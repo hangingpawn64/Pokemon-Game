@@ -12,6 +12,7 @@ std::string statusToString(Status status);
 class Pokemon {
 private:
     std::string name;
+    std::string spriteUrl;
     Type type;
     int maxHP, currentHP;
     int attack, defense, speed;
@@ -19,13 +20,17 @@ private:
     Status status;
 
 public:
-    Pokemon(const std::string& name, Type type, int maxHP, int attack, int defense, int speed);
+    Pokemon(const std::string& name, Type type, int maxHP, int attack, int defense, int speed,
+           const std::string& spriteUrl = "");
 
     void addMove(const Move& move);
-    void takeDamage(int amount);
-    void useMove(int index, Pokemon& target);
+    std::string takeDamage(int amount);
+    void healFull();
+    std::vector<std::string> useMove(int index, Pokemon& target);
 
     std::string getName() const;
+    std::string getSpriteUrl() const;
+    void setSpriteUrl(const std::string& url);
     Type getType() const;
     int getCurrentHP() const;
     int getmaxHP() const;
