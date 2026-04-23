@@ -21,3 +21,10 @@ A 2D retro-style Pok√©mon-inspired game made in C++ using SFML. Choose your Pok√
 sudo apt install libsfml-dev
 make overworld
 ./overworld
+
+### Play via latest release package
+
+1. Download the latest `.AppImage` from the [Releases Page](https://github.com/hangingpawn64/<your-repo>/releases/latest)
+2. Give permission to run it:
+   ```bash
+   chmod +x Overworld-x86_64.AppImage
