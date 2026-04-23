@@ -1,0 +1,45 @@
+# Ignore object files and binary executables
+*.o
+*.out
+*.exe
+overworld
+game
+
+# Ignore AppImage build artifacts
+*.AppImage
+AppDir/
+Overworld-*.AppImage
+
+# Ignore temporary files
+*~
+*.swp
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+*.log
+
+# Ignore build directories if any
+build/
+dist/
+
+# VS Code settings (if using)
+.vscode/
+
+# OS-generated files
+*.bak
+*.tmp
+
+# Compiled shared objects, libs, etc.
+*.so
+*.a
+*.dylib
+
+# SFML cache or debug files (if any)
+sfml-*
+
+# Ignore CMake cache if you use it in the future
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
