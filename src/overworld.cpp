@@ -76,25 +76,25 @@ int main() {
     // Tile Textures
     std::map<char, sf::Texture> tileTextures;
     std::map<char, std::string> tilePaths = {
-        {'.', "assets/tiles/grass.png"},
-        {'#', "assets/tiles/longGrass.png"},
-        {'@', "assets/tiles/house.png"},
-        {'V', "assets/tiles/volcano.png"},
-        {'E', "assets/tiles/electricCloud.png"},
-        {'L', "assets/tiles/water.png"},
-        {'!', "assets/tiles/volcanicRock.png"},
-        {'$', "assets/tiles/volcanicRock2.png"}, 
-        {'w', "assets/tiles/well.png"},
-        {'1', "assets/tiles/Plants1.png"},
-        {'3', "assets/tiles/Plants3.png"},
-        {'4', "assets/tiles/Plants4.png"},
-        {'6', "assets/tiles/rock1.png"},
-        {'7', "assets/tiles/rock2.png"},
-        {'8', "assets/tiles/rock3.png"},
-        {'9', "assets/tiles/rock4.png"},
-        {'f', "assets/tiles/rockcrumbsmall.png"},
-        {'g', "assets/tiles/rockcrumblong.png"},
-        {'?', "assets/tiles/flower.png"},
+        {'.', "assets/sprites/tiles/grass.png"},
+        {'#', "assets/sprites/tiles/longGrass.png"},
+        {'@', "assets/sprites/tiles/house.png"},
+        {'V', "assets/sprites/tiles/volcano.png"},
+        {'E', "assets/sprites/tiles/electricCloud.png"},
+        {'L', "assets/sprites/tiles/water.png"},
+        {'!', "assets/sprites/tiles/volcanicRock.png"},
+        {'$', "assets/sprites/tiles/volcanicRock2.png"}, 
+        {'w', "assets/sprites/tiles/well.png"},
+        {'1', "assets/sprites/tiles/Plants1.png"},
+        {'3', "assets/sprites/tiles/Plants3.png"},
+        {'4', "assets/sprites/tiles/Plants4.png"},
+        {'6', "assets/sprites/tiles/rock1.png"},
+        {'7', "assets/sprites/tiles/rock2.png"},
+        {'8', "assets/sprites/tiles/rock3.png"},
+        {'9', "assets/sprites/tiles/rock4.png"},
+        {'f', "assets/sprites/tiles/rockcrumbsmall.png"},
+        {'g', "assets/sprites/tiles/rockcrumblong.png"},
+        {'?', "assets/sprites/tiles/flower.png"},
     };
 
     for (auto const& [symbol, path] : tilePaths) {
@@ -105,10 +105,10 @@ int main() {
 
     sf::Texture playerTextures[4][3];
     std::string charPaths[4][3] = {
-        {"assets/character/walk_down_0.png", "assets/character/walk_down_1.png", "assets/character/walk_down_2.png"},
-        {"assets/character/walk_up_0.png", "assets/character/walk_up_1.png", "assets/character/walk_up_2.png"},
-        {"assets/character/walk_left_0.png", "assets/character/walk_left_1.png", "assets/character/walk_left_2.png"},
-        {"assets/character/walk_right_0.png", "assets/character/walk_right_1.png", "assets/character/walk_right_2.png"}
+        {"assets/sprites/player/walk_down_0.png", "assets/sprites/player/walk_down_1.png", "assets/sprites/player/walk_down_2.png"},
+        {"assets/sprites/player/walk_up_0.png", "assets/sprites/player/walk_up_1.png", "assets/sprites/player/walk_up_2.png"},
+        {"assets/sprites/player/walk_left_0.png", "assets/sprites/player/walk_left_1.png", "assets/sprites/player/walk_left_2.png"},
+        {"assets/sprites/player/walk_right_0.png", "assets/sprites/player/walk_right_1.png", "assets/sprites/player/walk_right_2.png"}
     };
 
     for (int d = 0; d < 4; ++d) {

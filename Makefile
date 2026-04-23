@@ -1,51 +1,54 @@
-CXX = g++ # this tell program to use g++ compiler
-CXXFLAGS = -I. -std=c++17 -Wall # -I. means look for .h files || -std=c++17 tells to use c++17 feature || -Wall shows all warnings during compilation
+CXX = g++
+CXXFLAGS = -I./src -std=c++17 -Wall
 
-SRCS = main.cpp\
-	Move.cpp\
-	Pokemon.cpp\
-	Battle.cpp\
-	pokemons/Squirtle.cpp\
-	pokemons/Charmander.cpp\
-	pokemons/Bulbasaur.cpp\
-	pokemons/Pikachu.cpp
-
+# Default build target
 TARGET = game
-
-# SFML stage2 build (loads sprites from URLs via libcurl)
-SFML_SRCS = sfml_stage2.cpp\
-	Pokemon.cpp\
-	Move.cpp\
-	pokemons/Pikachu.cpp\
-	pokemons/Bulbasaur.cpp\
-	pokemons/Charmander.cpp\
-	pokemons/Squirtle.cpp
-
-SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
-
-OVERWORLD_SRCS = overworld.cpp\
-	sfml_stage2.cpp\
-	Pokemon.cpp\
-	Move.cpp\
-	pokemons/Pikachu.cpp\
-	pokemons/Bulbasaur.cpp\
-	pokemons/Charmander.cpp\
-	pokemons/Squirtle.cpp
-
 OVERWORLD_TARGET = overworld
+SFML_TARGET = sfml_stage2
 
+# Main game build
+SRCS = src/main.cpp \
+	src/Move.cpp \
+	src/Pokemon.cpp \
+	src/Battle.cpp \
+	src/pokemons/Squirtle.cpp \
+	src/pokemons/Charmander.cpp \
+	src/pokemons/Bulbasaur.cpp \
+	src/pokemons/Pikachu.cpp
 
+# Sprite loader variant
+SFML_SRCS = src/sfml_stage2.cpp \
+	src/Pokemon.cpp \
+	src/Move.cpp \
+	src/pokemons/Pikachu.cpp \
+	src/pokemons/Bulbasaur.cpp \
+	src/pokemons/Charmander.cpp \
+	src/pokemons/Squirtle.cpp
+
+# Overworld map
+OVERWORLD_SRCS = src/overworld.cpp \
+	src/sfml_stage2.cpp \
+	src/Pokemon.cpp \
+	src/Move.cpp \
+	src/pokemons/Pikachu.cpp \
+	src/pokemons/Bulbasaur.cpp \
+	src/pokemons/Charmander.cpp \
+	src/pokemons/Squirtle.cpp
+
+# SFML and optional curl
+SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lcurl
+
+# Default rule
 all: $(TARGET)
 
 $(TARGET): $(SRCS)
-	$(CXX) $(CXXFLAGS) $(SRCS) -o $(TARGET)
+	$(CXX) $(CXXFLAGS) $(SRCS) -o $(TARGET) $(SFML_LIBS)
 
 $(SFML_TARGET): $(SFML_SRCS)
 	$(CXX) $(CXXFLAGS) $(SFML_SRCS) -o $(SFML_TARGET) $(SFML_LIBS)
 
 $(OVERWORLD_TARGET): $(OVERWORLD_SRCS)
 	$(CXX) $(CXXFLAGS) $(OVERWORLD_SRCS) -o $(OVERWORLD_TARGET) $(SFML_LIBS)
-
 
 clean:
 	rm -f $(TARGET) $(SFML_TARGET) $(OVERWORLD_TARGET)

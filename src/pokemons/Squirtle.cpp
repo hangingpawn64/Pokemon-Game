@@ -2,7 +2,7 @@
 
 Squirtle::Squirtle()
         : Pokemon("Squirtle", Type::Water, 100, 48, 65, 43,
-                  "assets/pokemons/squirtle.png") {
+                  "assets/sprites/pokemons/squirtle.png") {
         addMove(Move("Water Gun", Type::Water, 40, 100));
         addMove(Move("Tackle", Type::Normal, 40, 100));
         addMove(Move("Bubble Beam", Type::Water, 65, 95));

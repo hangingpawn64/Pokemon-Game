@@ -2,7 +2,7 @@
 
 Charmander::Charmander()
     : Pokemon("Charmander", Type::Fire, 100, 52, 43, 65,
-              "assets/pokemons/charmander.png") {
+              "assets/sprites/pokemons/charmander.png") {
     addMove(Move("Ember", Type::Fire, 40, 100));
     addMove(Move("Scratch", Type::Normal, 40, 100));
     addMove(Move("Flame Burst", Type::Fire, 70, 85));

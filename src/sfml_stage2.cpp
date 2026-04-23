@@ -261,12 +261,12 @@ void startBattle(sf::RenderWindow& window, Pokemon* wildPokemon)
 
 
                         // Load dynamic background based on enemy type
-                        std::string bgPath = "assets/backgrounds/default.png";
+                        std::string bgPath = "assets/sprites/backgrounds/default.png";
                         switch (enemy->getType()) {
-                            case Type::Fire: bgPath = "assets/backgrounds/fire.png"; break;
-                            case Type::Water: bgPath = "assets/backgrounds/water.png"; break;
-                            case Type::Grass: bgPath = "assets/backgrounds/grass.png"; break;
-                            case Type::Electric: bgPath = "assets/backgrounds/electric.png"; break;
+                            case Type::Fire: bgPath = "assets/sprites/backgrounds/fire.png"; break;
+                            case Type::Water: bgPath = "assets/sprites/backgrounds/water.png"; break;
+                            case Type::Grass: bgPath = "assets/sprites/backgrounds/grass.png"; break;
+                            case Type::Electric: bgPath = "assets/sprites/backgrounds/electric.png"; break;
                             default: break;
                         }
                         if (backgroundTexture.loadFromFile(bgPath)) {
