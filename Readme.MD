@@ -1,111 +1,95 @@
-# 🌟 Pokémon Starters Battle
+# 🎮 Pokémon Starters Battle
 
-A retro-style, 2D Pokémon-inspired adventure built in **C++** using **SFML**. Explore the world, walk into tall grass, and battle your favorite starter Pokémon — Squirtle, Charmander, Bulbasaur, and Pikachu!
-
----
-
-## 🎮 Features
-
-* Pixel-art overworld exploration
-* Turn-based battle mechanics
-* Classic starter Pokémon
-* Lightweight and portable
+A 2D retro-style Pokémon-inspired game i built in **C++ with SFML** to work on OOP. Choose your starter Pokémon, explore the world, and battle the first three starters—plus Pikachu!
 
 ---
 
-## ✨ Quick Start (Run Game as App)
+## 📦 Releases
 
-### 1. Download the AppImage
+To get started **quickly** without compiling code:
 
-Go to the [**Releases Page**](https://github.com/hangingpawn64/Pokemon-Game/releases/latest) and download the latest `Overworld-x86_64.AppImage`.
+### ✅ Linux Users (Ubuntu or similar):
 
-### 2. Make it executable
+1. **Download the latest release** from the [Releases Page](https://github.com/hangingpawn64/Pokemon-Game/releases)
+2. **Make it executable:**
 
-```bash
-chmod +x Overworld-x86_64.AppImage
-```
+   ```bash
+   chmod +x Overworld-x86_64.AppImage
+   ```
+3. **Run the game:**
 
-### 3. Run the game
+   ```bash
+   ./Overworld-x86_64.AppImage
+   ```
 
-```bash
-./Overworld-x86_64.AppImage
-```
-
-> ✅ No installation or compilation required!
-
----
-
-## 🐧 FUSE Error? Do This:
-
-If you get this error:
-
-```
-dlopen(): error loading libfuse.so.2
-AppImages require FUSE to run.
-```
-
-Fix it by installing FUSE:
-
-```bash
-sudo apt install libfuse2
-```
-
-If you still can’t run the AppImage, you can extract and run it manually:
-
-```bash
-./Overworld-x86_64.AppImage --appimage-extract
-cd squashfs-root
-./AppRun
-```
+> ℹ️ If you see a `libfuse.so.2` error, run:
+>
+> ```bash
+> sudo apt install libfuse2
+> ```
 
 ---
 
-## 🛠️ Build from Source (Developers)
+### ✅ Windows Users (in future releases):
 
-### Requirements
+> ⚠️ A native Windows `.exe` is not yet available. For now, you can:
+>
+> * Use **WSL (Windows Subsystem for Linux)** to build and run
+> * Or wait for a Windows build (coming soon)
 
-* C++17-compatible compiler
-* SFML development libraries
+---
 
-### Instructions
+## 🛠️ Build from Source
+
+You can compile the game manually on Linux or WSL:
+
+### 🔧 Requirements
+
+* A **C++17-compatible compiler** (e.g. `g++`)
+* **SFML library**
+
+### 📅 Clone and Build
 
 ```bash
-sudo apt install libsfml-dev
+sudo apt update
+sudo apt install build-essential libsfml-dev
+git clone https://github.com/hangingpawn64/Pokemon-Game
+cd Pokemon-Game
 make overworld
 ./overworld
 ```
 
 ---
 
-## 📁 Project Structure
+## 🧑‍💻 Development Notes
 
-```
-Pokemon/
-├── assets/               # Game sprites and images
-├── pokemons/             # Individual Pokémon logic
-├── AppDir/               # AppImage build files
-├── overworld             # Game binary
-├── Overworld-x86_64.AppImage
-├── Makefile
-└── README.md
+* Game is built with `make` and SFML.
+* Assets and sprites are stored locally and loaded at runtime.
+
+### To Clean Build Files:
+
+```bash
+make clean
 ```
 
 ---
 
-## 👤 Author
+## 📁 Repository Structure
 
-Created by **@hangingpawn64**
-GitHub: [github.com/hangingpawn64](https://github.com/hangingpawn64)
+```
+Pokemon-Game/
+├── AppDir/                 # Structure used for AppImage packaging
+├── assets/                # Game images, icons, audio
+├── src/                   # Source code (.cpp, .hpp)
+├── Makefile               # Build instructions
+├── overworld              # Compiled binary (after make)
+└── Overworld-x86_64.AppImage # Linux release
+```
 
 ---
 
-## 📜 Disclaimer
+## 🙌 Contributing
 
-This is a fan-made project inspired by Pokémon. All Pokémon names, sprites, and concepts are property of Nintendo and Game Freak.
+Pull requests and issues are welcome!
 
----
 
-## 🪪 License
-
-Code is licensed under the **MIT License**.
-See [LICENSE](LICENSE) for details.
