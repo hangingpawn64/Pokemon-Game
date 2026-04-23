@@ -5,7 +5,7 @@
 #include <ctime>
 #include <cmath>
 #include <queue>
-#include "SpriteLoader.h"
+#include "Pokemon.h"
 #include "pokemons/Pikachu.h"
 #include "pokemons/Bulbasaur.h"
 #include "pokemons/Charmander.h"
@@ -45,18 +45,38 @@ void pushMessage(const std::string& msg) {
     }
 }
 
-int main()
+sf::Color getTypeColor(Type t) {
+    switch (t) {
+        case Type::Fire:     return sf::Color(255, 80, 50);   // Vibrant Orange-Red
+        case Type::Water:    return sf::Color(50, 120, 240);  // Deep Sky Blue
+        case Type::Grass:    return sf::Color(80, 200, 80);   // Forest Green
+        case Type::Electric: return sf::Color(255, 220, 30);  // Electric Yellow
+        case Type::Normal:   return sf::Color(50, 220, 220);  // Vibrant Teal/Cyan for Normal
+        default:             return sf::Color(140, 140, 140); // Neutral Grey (Steel/Etc)
+    }
+}
+
+void startBattle(sf::RenderWindow& window, Pokemon* wildPokemon)
 {
-    srand((unsigned)time(0));
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Pokemon Battle");
+    // Reset global message state for fresh battle
+    while(!messageQueue.empty()) messageQueue.pop();
+    currentMessage = "";
+    shownMessage = "";
+    messageIndex = 0;
+    messageTimer = 0.0f;
+    messageHoldTimer = 0.0f;
+    messageDone = true;
+
+    window.setTitle("Pokemon Battle");
+
     sf::Clock clock;
 
     // Load Font
-    sf::Font font;
-    if (!font.loadFromFile("assets/ARIAL.TTF"))
+    sf::Font minecraftFont;
+    if (!minecraftFont.loadFromFile("assets/Minecraftia-Regular.ttf"))
     {
         std::cerr << "Failed to load font\n";
-        return 1;
+        return;
     }
 
     // Create roster with all Pokemon
@@ -64,13 +84,12 @@ int main()
         new Pikachu(), new Bulbasaur(), new Charmander(), new Squirtle()
     };
 
-    // Load textures for all Pokemon from their URLs
+    // Load textures for all Pokemon from local files
     std::vector<sf::Texture> textures(roster.size());
-    std::cout << "Downloading Pokemon sprites from URLs...\n";
     for (size_t i = 0; i < roster.size(); ++i) {
-        if (!loadTextureFromURL(textures[i], roster[i]->getSpriteUrl())) {
-            std::cerr << "Failed to load " << roster[i]->getName() << " sprite from URL\n";
-            return 1;
+        if (!textures[i].loadFromFile(roster[i]->getSpritePath())) {
+            std::cerr << "Failed to load " << roster[i]->getName() << " sprite from: " << roster[i]->getSpritePath() << "\n";
+            return;
         }
     }
     std::cout << "All sprites loaded successfully!\n";
@@ -107,37 +126,42 @@ int main()
     sf::Sprite backgroundSprite;
 
     // Text objects
-    sf::Text playerText("", font, 20);
+    sf::Text playerText("", minecraftFont, 20);
     playerText.setFillColor(sf::Color::White);
     playerText.setOutlineColor(sf::Color::Black);
     playerText.setOutlineThickness(2.0f);
 
-    sf::Text enemyText("", font, 20);
+    sf::Text enemyText("", minecraftFont, 20);
     enemyText.setFillColor(sf::Color::White);
     enemyText.setOutlineColor(sf::Color::Black);
     enemyText.setOutlineThickness(2.0f);
 
     // Selection screen title
-    sf::Text selectTitle("Choose Your Pokemon!", font, 28);
+    sf::Text selectTitle("Choose Your Pokemon!", minecraftFont, 28);
     selectTitle.setFillColor(sf::Color::Black);
-    selectTitle.setPosition(240, 30);
+    sf::FloatRect stBounds = selectTitle.getLocalBounds();
+    selectTitle.setOrigin(stBounds.left + stBounds.width / 2.0f, stBounds.top + stBounds.height / 2.0f);
+    selectTitle.setPosition(500, 45);
 
-    sf::Text selectHint("Up/Down to navigate, Enter to select", font, 14);
+    sf::Text selectHint("Up/Down to navigate, Enter to select", minecraftFont, 14);
     selectHint.setFillColor(sf::Color(120, 120, 120));
-    selectHint.setPosition(240, 65);
+    sf::FloatRect shBounds = selectHint.getLocalBounds();
+    selectHint.setOrigin(shBounds.left + shBounds.width / 2.0f, shBounds.top + shBounds.height / 2.0f);
+    selectHint.setPosition(500, 80);
 
-    // Result text (shown when battle ends)
-    sf::Text resultText("", font, 40);
-    resultText.setFillColor(sf::Color::Red);
+
 
     
     sf::RectangleShape newGameButton(sf::Vector2f(160, 40));
     newGameButton.setFillColor(sf::Color(100, 180, 255));
-    newGameButton.setPosition(320, 350);  // Centered
+    newGameButton.setPosition(420, 550);  // Centered in 1000x800
 
-    sf::Text newGameText("New Game", font, 20);
+    sf::Text newGameText("Return (R)", minecraftFont, 20);
+
     newGameText.setFillColor(sf::Color::White);
-    newGameText.setPosition(340, 360);
+    sf::FloatRect ngBounds = newGameText.getLocalBounds();
+    newGameText.setOrigin(std::floor(ngBounds.left + ngBounds.width / 2.0f), std::floor(ngBounds.top + ngBounds.height / 2.0f));
+    newGameText.setPosition(500, 570);
     
     // Move UI components (rebuilt after selection)
     std::vector<sf::Text> moveTexts;
@@ -163,23 +187,27 @@ int main()
     enemyBarBack.setFillColor(sf::Color(220, 220, 220));
     enemyBarBack.setOutlineColor(sf::Color::Black);
     enemyBarBack.setOutlineThickness(2.0f);
-    enemyBarBack.setPosition(450, 40);
+    enemyBarBack.setPosition(650, 40);
 
     sf::RectangleShape enemyBar;
     enemyBar.setFillColor(sf::Color::Green);
-    enemyBar.setPosition(450, 40);
+    enemyBar.setPosition(650, 40);
 
     // Moves box background
     sf::RectangleShape movesBg(sf::Vector2f(220, 100));
     movesBg.setFillColor(sf::Color(0, 0, 0, 200));
     movesBg.setOutlineThickness(2.0f);
     movesBg.setOutlineColor(sf::Color(255, 255, 255));
-    movesBg.setPosition(50, 480);
+    movesBg.setPosition(50, 680);
+
+    float totalTime = 0.0f;
+    float popupScale = 0.0f;
 
     // Render loop
     while (window.isOpen())
     {
         float deltaTime = clock.restart().asSeconds();
+        totalTime += deltaTime;
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -192,6 +220,7 @@ int main()
                     if (newGameButton.getGlobalBounds().contains(mousePos)) {
                         // Reset state
                         // Reset all state
+                        // Reset all state for potential next run within same call (though we return now)
                         gameState = GameState::Selecting;
                         selectedIndex = 0;
                         selectedMove = -1;
@@ -203,9 +232,9 @@ int main()
                         messageIndex = 0;
                         messageDone = false;
 
-                        // Clean up independent battle objects
-                        if (player) { delete player; player = nullptr; }
-                        if (enemy) { delete enemy; enemy = nullptr; }
+                        // Return to overworld
+                        return;
+
                     }
                 }
             }
@@ -224,10 +253,12 @@ int main()
                         player = new Pokemon(*roster[selectedIndex]);
                         playerTexture = textures[selectedIndex];
 
-                        // Enemy is randomly assigned from all choices (clone independent copy)
-                        int enemyIdx = rand() % roster.size();
-                        enemy = new Pokemon(*roster[enemyIdx]);
-                        enemyTexture = textures[enemyIdx];
+                        // Enemy is the wild pokemon passed to the function
+                        enemy = wildPokemon;
+                        if (!enemyTexture.loadFromFile(enemy->getSpritePath())) {
+                            std::cerr << "Failed to load wild pokemon sprite\n";
+                        }
+
 
                         // Load dynamic background based on enemy type
                         std::string bgPath = "assets/backgrounds/default.png";
@@ -241,7 +272,7 @@ int main()
                         if (backgroundTexture.loadFromFile(bgPath)) {
                             backgroundSprite.setTexture(backgroundTexture, true);
                             sf::Vector2u texSize = backgroundTexture.getSize();
-                            backgroundSprite.setScale(800.0f / texSize.x, 600.0f / texSize.y);
+                            backgroundSprite.setScale(1000.0f / texSize.x, 800.0f / texSize.y);
                         } else {
                             backgroundSprite.setTexture(sf::Texture(), true);
                         }
@@ -251,25 +282,31 @@ int main()
                         {
                             sf::Vector2u texSize = playerTexture.getSize();
                             float scale = playerTargetSize / std::max(texSize.x, texSize.y);
-                            playerSprite.setOrigin(texSize.x, 0); // Set origin to right edge for flipping
+                            playerSprite.setOrigin(texSize.x / 2.0f, texSize.y / 2.0f); 
                             playerSprite.setScale(-scale, scale); // Flip horizontally
                         }
-                        playerSprite.setPosition(50, 180);
+                        playerSprite.setPosition(200, 400);
 
                         // Set up enemy sprite
                         enemySprite.setTexture(enemyTexture, true);
                         {
                             sf::Vector2u texSize = enemyTexture.getSize();
                             float scale = enemyTargetSize / std::max(texSize.x, texSize.y);
+                            enemySprite.setOrigin(texSize.x / 2.0f, texSize.y / 2.0f);
                             enemySprite.setScale(scale, scale);
                         }
-                        enemySprite.setPosition(450, 180);
+                        enemySprite.setPosition(800, 400);
 
-                        // Set up name texts
+                        // Set up name texts (top bar centering)
                         playerText.setString(player->getName());
-                        playerText.setPosition(50, 12);
+                        sf::FloatRect ptBounds = playerText.getLocalBounds();
+                        playerText.setOrigin(0, std::floor(ptBounds.top + ptBounds.height / 2.0f));
+                        playerText.setPosition(50, 22); // Fine-tuned for top bar
+
                         enemyText.setString(enemy->getName());
-                        enemyText.setPosition(750 - enemyText.getLocalBounds().width, 12);
+                        sf::FloatRect etBounds = enemyText.getLocalBounds();
+                        enemyText.setOrigin(etBounds.width, std::floor(etBounds.top + etBounds.height / 2.0f));
+                        enemyText.setPosition(950, 22);
 
                         // Build move buttons and texts from player's moves
                         moveTexts.clear();
@@ -278,7 +315,7 @@ int main()
                         for (size_t i = 0; i < moves.size(); ++i) {
                             // Column layout position
                             float bx = 60;
-                            float by = 488 + i * 32;
+                            float by = 688 + i * 32;
 
                             // Create button
                             sf::RectangleShape btn(sf::Vector2f(200, 28));
@@ -289,7 +326,7 @@ int main()
                             moveButtons.push_back(btn);
 
                             // Create text centered in button
-                            sf::Text moveText(moves[i].name, font, 14);
+                            sf::Text moveText(moves[i].name, minecraftFont, 14);
                             sf::FloatRect tr = moveText.getLocalBounds();
                             moveText.setOrigin(tr.left + tr.width / 2.0f, tr.top + tr.height / 2.0f);
                             moveText.setPosition(bx + 200.0f / 2.0f, by + 28.0f / 2.0f);
@@ -334,6 +371,11 @@ int main()
                         }
                     }
                 }
+                else if (gameState == GameState::End) {
+                    if (event.key.code == sf::Keyboard::R) {
+                        return; // Return to overworld
+                    }
+                }
             }
         }
 
@@ -348,29 +390,51 @@ int main()
             // Draw each Pokemon option with its sprite preview
             for (size_t i = 0; i < roster.size(); ++i)
             {
-                // Sprite preview (small)
+                // Row background highlight for selected
+                if ((int)i == selectedIndex) {
+                    sf::RectangleShape rowHighlight(sf::Vector2f(700, 80));
+                    rowHighlight.setOrigin(350, 40);
+                    rowHighlight.setPosition(500, 150 + i * 100);
+                    rowHighlight.setFillColor(sf::Color(240, 240, 240, 150));
+                    rowHighlight.setOutlineColor(sf::Color(100, 180, 255));
+                    rowHighlight.setOutlineThickness(2.0f);
+                    window.draw(rowHighlight);
+                }
+
+                // Sprite preview (vertically centered in 100px row)
                 sf::Sprite preview(textures[i]);
                 sf::Vector2u texSize = textures[i].getSize();
                 float scale = 60.0f / std::max(texSize.x, texSize.y);
+                
+                // Selection scale effect
+                if ((int)i == selectedIndex) scale *= (1.0f + 0.1f * std::sin(totalTime * 5.0f));
+                
                 preview.setScale(scale, scale);
-                preview.setPosition(260, 100 + i * 100);
+                preview.setOrigin(texSize.x / 2.0f, texSize.y / 2.0f);
+                preview.setPosition(390, 150 + i * 100);
 
-                // Name + type text
+                // Name + type text (vertically centered in 100px row)
                 std::string label = roster[i]->getName() + "  (" + typeToString(roster[i]->getType()) + ")";
-                sf::Text optionText(label, font, 20);
-                optionText.setPosition(340, 115 + i * 100);
+                sf::Text optionText(label, minecraftFont, 20);
+                sf::FloatRect otBounds = optionText.getLocalBounds();
+                optionText.setOrigin(0, std::floor(otBounds.top + otBounds.height / 2.0f));
+                optionText.setPosition(440, 150 + i * 100);
 
                 // Highlight selected
                 if ((int)i == selectedIndex) {
-                    optionText.setFillColor(sf::Color::Red);
+                    optionText.setFillColor(sf::Color(0, 100, 255));
+                    optionText.setStyle(sf::Text::Bold);
 
-                    // Draw selection arrow
-                    sf::Text arrow(">", font, 24);
-                    arrow.setFillColor(sf::Color::Red);
-                    arrow.setPosition(235, 112 + i * 100);
+                    // Draw selection arrow with pulse
+                    sf::Text arrow(">", minecraftFont, 24);
+                    sf::FloatRect arBounds = arrow.getLocalBounds();
+                    arrow.setOrigin(arBounds.width / 2.0f, std::floor(arBounds.top + arBounds.height / 2.0f));
+                    float xPulse = 345 + 5.0f * std::sin(totalTime * 8.0f);
+                    arrow.setPosition(xPulse, 150 + i * 100);
+                    arrow.setFillColor(sf::Color(0, 100, 255));
                     window.draw(arrow);
                 } else {
-                    optionText.setFillColor(sf::Color::Black);
+                    optionText.setFillColor(sf::Color(80, 80, 80));
                 }
 
                 window.draw(preview);
@@ -419,14 +483,14 @@ int main()
                     // shake effect
                     float offset = std::sin(t * 40.0f) * 2.0f;
                     if (isPlayerTurn)
-                        enemySprite.setPosition(450 + offset, 180);
+                        enemySprite.setPosition(800 + offset, 400);
                     else
-                        playerSprite.setPosition(50 + offset, 180);
+                        playerSprite.setPosition(200 + offset, 400);
 
                     if (t > animationDuration) {
                         // reset positions
-                        playerSprite.setPosition(50, 180);
-                        enemySprite.setPosition(450, 180);
+                        playerSprite.setPosition(200, 400);
+                        enemySprite.setPosition(800, 400);
                         
                         battlePhase = BattlePhase::Waiting;
                         phaseClock.restart();
@@ -514,26 +578,91 @@ int main()
 
             // Draw moves only if queue is empty (avoids visual overlap)
             if (messageQueue.empty() && messageDone) {
+                sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+                sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
+
                 window.draw(movesBg);
                 for (size_t i = 0; i < moveButtons.size(); ++i)
                 {
-                    if ((int)i == selectedMove) {
-                        moveButtons[i].setOutlineColor(sf::Color::Yellow);
-                        moveButtons[i].setOutlineThickness(2.0f);
-                        moveButtons[i].setFillColor(sf::Color(80, 80, 80));
-                        moveTexts[i].setFillColor(sf::Color::Yellow);
+                    sf::RectangleShape& btn = moveButtons[i];
+                    sf::Text& txt = moveTexts[i];
+                    
+                    // Force non-hovered state first to ensure bounds check is against base position
+                    btn.setScale(1.0f, 1.0f);
+                    btn.setOrigin(0, 0);
+                    btn.setPosition(60, 688 + i * 32);
+                    
+                    bool hovered = btn.getGlobalBounds().contains(mousePos);
+                    bool selected = ((int)i == selectedMove);
+                    bool active = (selected || hovered);
+
+                    Type moveType = player->getMoves()[i].type;
+                    sf::Color moveColor = getTypeColor(moveType);
+                    
+                    // Base styling reset
+                    btn.setOutlineThickness(2.0f);
+                    
+                    if (active) {
+                        // Subtle selection pulse
+                        float pulseFactor = 0.01f * std::sin(totalTime * 10.0f);
+                        btn.setScale(1.03f + pulseFactor, 1.05f);
+                        btn.setOrigin(btn.getSize().x / 2.0f, btn.getSize().y / 2.0f);
+                        btn.setPosition(160, 688 + i * 32 + 14);
+                        
+                        btn.setFillColor(moveColor);
+                        btn.setOutlineColor(sf::Color::White);
+                        btn.setOutlineThickness(3.0f);
+                        
+                        txt.setFillColor(sf::Color::White);
+                        txt.setOutlineColor(sf::Color::Black);
+                        txt.setOutlineThickness(1.5f);
+                        txt.setStyle(sf::Text::Bold);
+                        txt.setPosition(btn.getPosition());
                     } else {
-                        moveButtons[i].setOutlineColor(sf::Color::White);
-                        moveButtons[i].setOutlineThickness(1.0f);
-                        moveButtons[i].setFillColor(sf::Color(40, 40, 40));
-                        moveTexts[i].setFillColor(sf::Color::White);
+                        // btn already set to base pos/scale above
+                        sf::Color uniformBase = sf::Color(45, 45, 45);
+                        btn.setFillColor(uniformBase);
+                        btn.setOutlineColor(sf::Color(100, 100, 100));
+                        btn.setOutlineThickness(1.0f);
+                        
+                        txt.setFillColor(sf::Color(180, 180, 180));
+                        txt.setOutlineThickness(0);
+                        txt.setStyle(sf::Text::Regular);
+                        txt.setPosition(60 + 100, 688 + i * 32 + 14);
                     }
 
-                    window.draw(moveButtons[i]);
-                    window.draw(moveTexts[i]);
+                    // Draw 3D Bevel/Shadow
+                    sf::RectangleShape shadow(btn.getSize());
+                    shadow.setOrigin(btn.getOrigin());
+                    shadow.setPosition(btn.getPosition().x + 2, btn.getPosition().y + 2);
+                    shadow.setScale(btn.getScale());
+                    shadow.setFillColor(sf::Color(0, 0, 0, 100));
+                    window.draw(shadow);
+
+                    window.draw(btn);
+                    
+                    // Gloss highlight
+                    sf::RectangleShape gloss(sf::Vector2f(btn.getGlobalBounds().width, btn.getGlobalBounds().height / 2.0f));
+                    gloss.setPosition(btn.getGlobalBounds().left, btn.getGlobalBounds().top);
+                    gloss.setFillColor(sf::Color(255, 255, 255, 40));
+                    window.draw(gloss);
+                    
+                    window.draw(txt);
                 }
+                
                 if (gameState == GameState::End) {
+                    // New Game Button styling
+                    newGameButton.setOutlineThickness(3.0f);
+                    newGameButton.setOutlineColor(sf::Color::White);
+                    float ngScale = 1.0f + 0.05f * std::abs(std::sin(totalTime * 3.0f));
+                    newGameButton.setScale(ngScale, ngScale);
+                    newGameButton.setOrigin(80, 20);
+                    newGameButton.setPosition(500, 570);
+                    
                     window.draw(newGameButton);
+                    
+                    newGameText.setPosition(newGameButton.getPosition());
+                    newGameText.setScale(ngScale, ngScale);
                     window.draw(newGameText);
                 }
             }
@@ -567,53 +696,64 @@ int main()
                 msgBox.setFillColor(sf::Color(240, 240, 240));
                 msgBox.setOutlineThickness(2);
                 msgBox.setOutlineColor(sf::Color::Black);
-                msgBox.setPosition(50, 500);
+                msgBox.setPosition(50, 700);
                 window.draw(msgBox);
 
-                sf::Text typedText(shownMessage, font, 18);
-                typedText.setPosition(60, 510);
+                sf::Text typedText(shownMessage, minecraftFont, 18);
+                sf::FloatRect ttBounds = typedText.getLocalBounds();
+                typedText.setOrigin(0, ttBounds.top + ttBounds.height / 2.0f);
+                typedText.setPosition(60, 730);
                 typedText.setFillColor(sf::Color::Black);
                 window.draw(typedText);
             }
 
             if (gameState == GameState::End && messageQueue.empty() && messageDone) {
-                // Outer black border
-                sf::RectangleShape outerBox(sf::Vector2f(300, 80));
-                outerBox.setOrigin(150, 40);
-                outerBox.setPosition(400, 200); // top center
-                outerBox.setFillColor(sf::Color::Black);
+                // Pop-up animation
+                if (popupScale < 1.0f) popupScale += deltaTime * 4.0f;
+                if (popupScale > 1.0f) popupScale = 1.0f;
 
-                // Inner white box layer
-                sf::RectangleShape midBox(sf::Vector2f(292, 72)); // 4px border
-                midBox.setOrigin(146, 36);
-                midBox.setPosition(400, 200);
-                midBox.setFillColor(sf::Color::White);
+                float displayScale = popupScale * (1.0f + 0.05f * std::sin(totalTime * 2.0f));
 
-                // Inner black border layer
-                sf::RectangleShape innerBorder(sf::Vector2f(284, 64)); // 4px padding
-                innerBorder.setOrigin(142, 32);
-                innerBorder.setPosition(400, 200);
-                innerBorder.setFillColor(sf::Color::Black);
+                // Multi-layered stylish frame
+                sf::RectangleShape outerBox(sf::Vector2f(400, 120));
+                outerBox.setOrigin(200, 60);
+                outerBox.setPosition(500, 300);
+                outerBox.setScale(displayScale, displayScale);
+                outerBox.setFillColor(sf::Color(0, 50, 100)); // Dark navy
+                outerBox.setOutlineThickness(4);
+                outerBox.setOutlineColor(sf::Color::White);
 
-                // Innermost background layer
-                sf::RectangleShape innerBox(sf::Vector2f(276, 56)); // 4px border
-                innerBox.setOrigin(138, 28);
-                innerBox.setPosition(400, 200);
+                sf::RectangleShape innerBox(sf::Vector2f(380, 100));
+                innerBox.setOrigin(190, 50);
+                innerBox.setPosition(500, 300);
+                innerBox.setScale(displayScale, displayScale);
                 innerBox.setFillColor(sf::Color(240, 240, 240));
+                innerBox.setOutlineThickness(2);
+                innerBox.setOutlineColor(sf::Color::Black);
 
                 window.draw(outerBox);
-                window.draw(midBox);
-                window.draw(innerBorder);
                 window.draw(innerBox);
 
-                // Result text
-                sf::Text resText(battleResult, font, 36);
+                // Result text with shadow for depth
+                sf::Text resTextShadow(battleResult, minecraftFont, 44);
+                resTextShadow.setStyle(sf::Text::Bold);
+                resTextShadow.setFillColor(sf::Color(0, 0, 0, 100));
+                sf::FloatRect rsBounds = resTextShadow.getLocalBounds();
+                resTextShadow.setOrigin(std::floor(rsBounds.left + rsBounds.width / 2.f), std::floor(rsBounds.top + rsBounds.height / 2.f));
+                resTextShadow.setPosition(500 + 4, 300 + 4);
+                resTextShadow.setScale(displayScale, displayScale);
+                window.draw(resTextShadow);
+
+                sf::Text resText(battleResult, minecraftFont, 44);
                 resText.setStyle(sf::Text::Bold);
-                resText.setFillColor(sf::Color::Black);
-                sf::FloatRect bounds = resText.getLocalBounds();
-                resText.setOrigin(bounds.left + bounds.width / 2.f, bounds.top + bounds.height / 2.f);
-                resText.setPosition(400, 200);
+                resText.setFillColor(battleResult == "YOU WIN!" ? sf::Color(0, 150, 0) : sf::Color(150, 0, 0));
+                sf::FloatRect resBounds = resText.getLocalBounds();
+                resText.setOrigin(std::floor(resBounds.left + resBounds.width / 2.f), std::floor(resBounds.top + resBounds.height / 2.f));
+                resText.setPosition(500, 300);
+                resText.setScale(displayScale, displayScale);
                 window.draw(resText);
+            } else {
+                popupScale = 0.0f; // Reset for next time
             }
         }
 
@@ -624,7 +764,9 @@ int main()
     for (auto* p : roster)
         delete p;
     if (player) delete player;
+    // Note: enemy (wildPokemon) is deleted by the overworld or at the end of this function
     if (enemy) delete enemy;
 
-    return 0;
+    return;
 }
+

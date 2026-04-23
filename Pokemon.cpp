@@ -3,8 +3,8 @@
 #include <cstdlib>
 
 Pokemon::Pokemon(const std::string& name, Type type, int maxHP, int attack, int defense, int speed,
-                 const std::string& spriteUrl)
-    : name(name), spriteUrl(spriteUrl), type(type), maxHP(maxHP), currentHP(maxHP),
+                 const std::string& spritePath)
+    : name(name), spritePath(spritePath), type(type), maxHP(maxHP), currentHP(maxHP),
       attack(attack), defense(defense), speed(speed), status(Status::NONE) {}
 
 void Pokemon::addMove(const Move& move) {
@@ -12,8 +12,8 @@ void Pokemon::addMove(const Move& move) {
 }
 
 std::string Pokemon::getName() const { return name; }
-std::string Pokemon::getSpriteUrl() const { return spriteUrl; }
-void Pokemon::setSpriteUrl(const std::string& url) { spriteUrl = url; }
+std::string Pokemon::getSpritePath() const { return spritePath; }
+void Pokemon::setSpritePath(const std::string& path) { spritePath = path; }
 Type Pokemon::getType() const { return type; }
 int Pokemon::getmaxHP() const { return maxHP; }
 int Pokemon::getCurrentHP() const { return currentHP; }

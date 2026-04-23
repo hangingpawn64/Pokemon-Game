@@ -14,7 +14,6 @@ TARGET = game
 
 # SFML stage2 build (loads sprites from URLs via libcurl)
 SFML_SRCS = sfml_stage2.cpp\
-	SpriteLoader.cpp\
 	Pokemon.cpp\
 	Move.cpp\
 	pokemons/Pikachu.cpp\
@@ -22,8 +21,19 @@ SFML_SRCS = sfml_stage2.cpp\
 	pokemons/Charmander.cpp\
 	pokemons/Squirtle.cpp
 
-SFML_TARGET = sfml_stage2
-SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lcurl
+SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
+
+OVERWORLD_SRCS = overworld.cpp\
+	sfml_stage2.cpp\
+	Pokemon.cpp\
+	Move.cpp\
+	pokemons/Pikachu.cpp\
+	pokemons/Bulbasaur.cpp\
+	pokemons/Charmander.cpp\
+	pokemons/Squirtle.cpp
+
+OVERWORLD_TARGET = overworld
+
 
 all: $(TARGET)
 
@@ -33,5 +43,9 @@ $(TARGET): $(SRCS)
 $(SFML_TARGET): $(SFML_SRCS)
 	$(CXX) $(CXXFLAGS) $(SFML_SRCS) -o $(SFML_TARGET) $(SFML_LIBS)
 
+$(OVERWORLD_TARGET): $(OVERWORLD_SRCS)
+	$(CXX) $(CXXFLAGS) $(OVERWORLD_SRCS) -o $(OVERWORLD_TARGET) $(SFML_LIBS)
+
+
 clean:
-	rm -f $(TARGET) $(SFML_TARGET)
+	rm -f $(TARGET) $(SFML_TARGET) $(OVERWORLD_TARGET)
