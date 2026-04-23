@@ -24,7 +24,7 @@ make overworld
 
 ### Play via latest release package
 
-1. Download the latest `.AppImage` from the [Releases Page](https://github.com/hangingpawn64/<your-repo>/releases/latest)
+1. Download the latest `.AppImage` from the [Releases Page](https://github.com/hangingpawn64/Pokemon-Game/releases/tag/v1.0.0)
 2. Give permission to run it:
    ```bash
    chmod +x Overworld-x86_64.AppImage
