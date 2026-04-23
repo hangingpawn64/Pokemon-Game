@@ -1,4 +1,4 @@
-# 🎮 Pokémon Starters Battle
+#  Pokémon Starters Battle
 
 A 2D retro-style Pokémon-inspired game i built in **C++ with SFML** to work on OOP. Choose your starter Pokémon, explore the world, and battle the first three starters—plus Pikachu!
 
@@ -8,7 +8,7 @@ A 2D retro-style Pokémon-inspired game i built in **C++ with SFML** to work on 
 
 To get started **quickly** without compiling code:
 
-### ✅ Linux Users (Ubuntu or similar):
+###  Linux Users (Ubuntu or similar):
 
 1. **Download the latest release** from the [Releases Page](https://github.com/hangingpawn64/Pokemon-Game/releases)
 2. **Make it executable:**
@@ -22,7 +22,7 @@ To get started **quickly** without compiling code:
    ./Overworld-x86_64.AppImage
    ```
 
-> ℹ️ If you see a `libfuse.so.2` error, run:
+> If you see a `libfuse.so.2` error, run:
 >
 > ```bash
 > sudo apt install libfuse2
@@ -30,25 +30,25 @@ To get started **quickly** without compiling code:
 
 ---
 
-### ✅ Windows Users (in future releases):
+###  Windows Users (in future releases):
 
-> ⚠️ A native Windows `.exe` is not yet available. For now, you can:
+>  A native Windows `.exe` is not yet available. For now, you can:
 >
 > * Use **WSL (Windows Subsystem for Linux)** to build and run
 > * Or wait for a Windows build (coming soon)
 
 ---
 
-## 🛠️ Build from Source
+##  Build from Source
 
 You can compile the game manually on Linux or WSL:
 
-### 🔧 Requirements
+###  Requirements
 
 * A **C++17-compatible compiler** (e.g. `g++`)
 * **SFML library**
 
-### 📅 Clone and Build
+###  Clone and Build
 
 ```bash
 sudo apt update
@@ -61,7 +61,7 @@ make overworld
 
 ---
 
-## 🧑‍💻 Development Notes
+##  Development Notes
 
 * Game is built with `make` and SFML.
 * Assets and sprites are stored locally and loaded at runtime.
@@ -88,7 +88,7 @@ Pokemon-Game/
 
 ---
 
-## 🙌 Contributing
+##  Contributing
 
 Pull requests and issues are welcome!
 
