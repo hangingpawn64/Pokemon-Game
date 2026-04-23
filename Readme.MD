@@ -28,3 +28,6 @@ make overworld
 2. Give permission to run it:
    ```bash
    chmod +x Overworld-x86_64.AppImage
+3. Launch the game
+```bash
+    ./Overworld-x86_64.AppImage
